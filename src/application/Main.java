@@ -18,6 +18,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -31,44 +32,31 @@ import javafx.scene.layout.VBox;
 import javafx.util.converter.IntegerStringConverter;
 
 /* SQL - Ligação a Bases de Dados MySQL e SQLServer e comandos DML.
- * 		Neste esxercício vamos manipular dados com recurso a bases
- * 		de dados. A partir de um menu acedemos a consultas de Alunos,
- * 		professores ou funcionários de uma escola. A partir de um de
- * 		3 botões, inserimos, alteramos ou eliminamos dados referentes
- * 		à entidade que estiver a ser exibida na altura.    
+ * Neste esxercício vamos usar um menu para selecionar uma de 3 entidades: 
+ * Alunos, Professores ou Alunos e com recursos a 3 botões, executar 
+ * comandos DML: query, insert, update e delete.    
 
- *TODO: Copiar border layout ex. 17, manter layouts esq. e central
- * 		Região Esq: Botões: inserir, alterar apagar
- * 		Região TOP: Menu:
- * 		- File: Sair
- * 		- RH: Recursos humanos, carrega Alunos, Professores e Funcionários
- * 			RadioItemMenus para carregar a lista da região central respetiva
- * 			Os botões DML, verificam o valor ativo no RadioItemMenu e atuam
- * 			em conformidade.
- * 			Qualquer das ações DML abre uma modal para aí se atuar.
- * 
- * 		Região Central, TableView com os dados da tabela repetiva.
- * ---------------------------------------------------------------------
- * Passo1 - Começar por criar o rootLayou do tipo borderPane e 
+ * Passo1 - Começar por criar o rootLayout do tipo borderPane e 
  * 			escrever o linhas de comentário para delimitar as regiões.
- * Passo2 - Criar todo o Layout das 3 regiões a usar: top, esq e centro.
- * Passo3 - Criar o menu na região top
- * 			Criar os botões na região esquerda.
+ * Passo2 - Criar o menu na região top
+ * Passo3 - Criar os botões na região esquerda.
  * 			Criar ações de alert para testar funcionamento.
- * Passo4 - Criar as tableView 
+ * Passo4 - Criar as tableView em métodos para atuar na região centro.
  * 			Criar 3 tableViews para o layout da região central: ex17
  * 			Criar 3 métodos para carregar as tableViews (ex17)
  * 			Criar 3 classes: Aluno, Professor e Funcionário
- * 			Criar 3 Tabelas: Aluno, Professor e Funcionário
  */ 
 
 public class Main extends Application {
 	
-	static String btnClicado = "";					// Recebe o nome do botão clicado
+	// Atributos da classe: podem ser  acedidos de qualquer método. São globais à classe 
+	static String btnClicado = "";					// Recebe o nome do botão clicado (Inserir, Alterar, Eliminar)
 	static Aluno alunoSelecionado = null;			// Recebe o aluno selecionado da lista, para alteração/eliminação
 	BorderPane layoutRoot = new BorderPane();		// Layout Principal: BorderPAne - 5 Regiões
 	static Connection conn = null;					// Ligação a base de dados
 	static TableView<Aluno> tableViewAlunos = null;	// Criação de tabela de alunos
+	
+	static boolean msgON = false;					// Ativa Mensagens de controlo
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -97,21 +85,41 @@ public class Main extends Application {
 			// Menu Ficheiro - Opções simples
 			MenuItem menuItemFileOpcao1 = new MenuItem("Opção1");	// Opções do menu Ficheiro
 			MenuItem menuItemFileOpcao2 = new MenuItem("Opção1");
-			MenuItem menuItemFileOpcao3 = new MenuItem("Opção3");
+			
+			SeparatorMenuItem menuItemSeparador = new SeparatorMenuItem(); //Separador de menu
+			
+			
+			RadioMenuItem menuItemFileMsgOn = new RadioMenuItem("Msg - ON");
+			RadioMenuItem menuItemFileMsgOff = new RadioMenuItem("Msg - OFF");
+			
+			//Agrupar os RadioMenuItens da MSG num Toggle
+			ToggleGroup toggleMenuFileMsg = new ToggleGroup();
+			menuItemFileMsgOn.setToggleGroup(toggleMenuFileMsg);
+			menuItemFileMsgOff.setToggleGroup(toggleMenuFileMsg);
+			menuItemFileMsgOff.setSelected(true);					// opção prédefinida (checked)
+			
 			
 			// Listeners
 			menuItemFileOpcao1.setOnAction(e->Utils.alertBox("Menu File","op1 - a desenvolver"));
 			menuItemFileOpcao2.setOnAction(e->Utils.alertBox("Menu File","op2 - a desenvolver"));
-			menuItemFileOpcao3.setOnAction(e->Utils.alertBox("Menu File","op3 - a desenvolver"));
-
-			//SeparatorMenuItem menuItemSeparador = new SeparatorMenuItem(); //Separador de menu
+			menuItemFileMsgOn.setOnAction(e-> {
+				msgON = true; 							// Ativa mensagens para este projeto	
+				UtilsSQLConn.msgON = true;				// Ativa mensagens na UtilsSQLconn
+				//Utils.alertBox("Menu File","Mensagens de controlo Ativdas");
+			});
+			menuItemFileMsgOff.setOnAction(e->{
+				msgON = true; 							// Ativa mensagens para este projeto	
+				UtilsSQLConn.msgON = false;				// Ativa mensagens na UtilsSQLconn 
+				//Utils.alertBox("Menu File","Mensagens de controlo Desativadas");
+			});
 
 			// Adicionar os MenuItens ao menuFile.
 			menuFile.getItems().addAll(
 					menuItemFileOpcao1,
 					menuItemFileOpcao2,
-					//menuItemSeparador,
-					menuItemFileOpcao3);
+					menuItemSeparador,
+					menuItemFileMsgOn,
+					menuItemFileMsgOff);
 
 			
 			// Menu Entidade - RadioMenuItens, com listeners, para chamar as ações
@@ -137,7 +145,10 @@ public class Main extends Application {
 			
 			menuItemEntidadeProfs.setOnAction(e->{
 				if(menuItemEntidadeProfs.isSelected()){
-					Utils.alertBox("Menu Entidades","TODO - TavleView Professores");
+					if(msgON){
+						Utils.alertBox("Menu Entidades","TODO - TavleView Professores");
+					}
+					
 					//TODO: CARREGA TABLEVIEW NA REGIÃO CENTRAL COM DADOS DA TABELA PROFS
 					//layoutRoot.setCenter(   layoutProfLista()  );
 				}
@@ -145,17 +156,21 @@ public class Main extends Application {
 
 			menuItemEntidadeFunc.setOnAction(e->{
 				if(menuItemEntidadeFunc.isSelected()){
-					Utils.alertBox("Menu Entidades","TODO - TavleView Funcionários");
+					if(msgON){
+						Utils.alertBox("Menu Entidades","TODO - TavleView Funcionários");
+					}
 					//TODO: CARREGA TABLEVIEW NA REGIÃO CENTRAL COM DADOS DA TABELA FUNCS
 					//layoutRoot.setCenter(   layoutFuncLista()  );
 				}
 			});
 
-			// Adicionar os MenuItens ao menuFile.
+			// Adicionar os MenuItens ao menuEntidades.
 			menuEntidade.getItems().addAll(
 					menuItemEntidadeAlunos,
 					menuItemEntidadeProfs,
 					menuItemEntidadeFunc);
+			
+			
 			
 			// Aassociar os menus ao MenuBar
 			menuBar.getMenus().addAll(menuFile, menuEntidade);
@@ -215,7 +230,7 @@ public class Main extends Application {
 				// Extrai e testa se há registo clicado da lista de selecionados
 				// Como só pode haver 1, estará na posição 0.
 				ObservableList<Aluno> itemSelecionado = tableViewAlunos.getSelectionModel().getSelectedItems();
-				if(itemSelecionado.get(0) == null){
+				if(msgON){
 					Utils.alertBox("INFO", "Não selecionou qualquer registo");
 				}
 				else {
@@ -242,7 +257,7 @@ public class Main extends Application {
 				// Como só pode haver 1, estará na posição 0.
 				
 				ObservableList<Aluno> itemSelecionado = tableViewAlunos.getSelectionModel().getSelectedItems();
-				if(itemSelecionado.get(0) == null){
+				if(msgON){
 					Utils.alertBox("INFO", "Não selecionou qualquer registo");
 				}
 				else {
@@ -648,7 +663,9 @@ public class Main extends Application {
 						
 						// Procedimentos finais
 						btnClicado = "";					// Desativar botão clicado
-						Utils.alertBox("BD", " Alunos - Insert OK");
+						if(msgON){
+							Utils.alertBox("BD", " Alunos - Insert OK");
+						}
 					}
 				}
 				
@@ -677,7 +694,9 @@ public class Main extends Application {
 					// Procedimentos finais
 					btnClicado = "";					// Desativar botão clicado
 					alunoSelecionado = null;			// Desativar aluno selecionado
-					Utils.alertBox("BD", " Alunos - Update OK");
+					if(msgON){
+						Utils.alertBox("BD", " Alunos - Update OK");
+					}
 				}
 				
 				
@@ -694,7 +713,9 @@ public class Main extends Application {
 					// Procedimentos finais
 					btnClicado = "";					// Desativar botão clicado
 					alunoSelecionado = null;			// Desativar aluno selecionado
-					Utils.alertBox("BD", " Alunos - Delete OK");
+					if(msgON){
+						Utils.alertBox("BD", " Alunos - Delete OK");
+					}
 				}
 				
 				layoutRoot.setCenter( layoutAlunoLista() );	// Carrega região central com lista de Alunos
