@@ -4,7 +4,7 @@ package application;
 
 import java.sql.Connection;
 
-import application.Utils;
+import application.*;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,7 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.converter.IntegerStringConverter;
 
 /* SQL - Ligação a Bases de Dados MySQL e SQLServer e comandos DML.
- * Neste esxercício vamos usar um menu para selecionar uma de 3 entidades: 
+ * Neste exercício vamos usar um menu para selecionar uma de 3 entidades: 
  * Alunos, Professores ou Alunos e com recursos a 3 botões, executar 
  * comandos DML: query, insert, update e delete.    
 
@@ -207,7 +207,7 @@ public class Main extends Application {
 			
 			// Listeners
 			/*TODO: verifica a Entidade ativa no menu Entidade e ativa o layout de inserir dados
-			 * no Layout central. Ali haverá TextFields e 2 botões, Cancelar e Inserir que fará
+			 * no Layout central. Ali haverá TextFields e 2 botões (OK e CANCELAR), OK que fará 
 			 * a respetiva validação dos dados introduzicos e a inserção na BD
 			 */
 			btnLeftLayoutInserir.setOnAction(e->{
@@ -215,7 +215,7 @@ public class Main extends Application {
 				btnClicado = "Inserir";			// Ativa btnClicado para Inserir
 				
 				// Carrega layout de detalhes da Entidade ativa
-				if(menuItemEntidadeAlunos.isSelected()){layoutRoot.setCenter(layoutAlunoDetalhes());}
+				if(menuItemEntidadeAlunos.isSelected()){layoutRoot.setCenter( layoutAlunoDetalhes() );}
 				
 				/*TODO: Desenvolver os métodos de detalhes para Professor e Funcionario
 				if(menuItemEntidadeProfs.isSelected()){layoutRoot.setCenter(layoutProfDetalhes());}
@@ -386,8 +386,8 @@ public class Main extends Application {
 		 
 			// associar a lista ativa à região CENTER do rootLayout
 			if(menuItemEntidadeAlunos.isSelected()){layoutRoot.setCenter(   layoutAlunoLista()  );}
-			if(menuItemEntidadeProfs.isSelected()){Utils.alertBox("setCenter", "Profs por Por fazer")  ;}
-			if(menuItemEntidadeFunc.isSelected()){Utils.alertBox("setCenter", "Funcs Por fazer")  ;}
+			//if(menuItemEntidadeProfs.isSelected()){Utils.alertBox("setCenter", "Profs por Por fazer")  ;}
+			//if(menuItemEntidadeFunc.isSelected()){Utils.alertBox("setCenter", "Funcs Por fazer")  ;}
 
 
 			
@@ -407,42 +407,6 @@ public class Main extends Application {
 		}
 	}
 	
-	/*************************************************************************************************
-	 * Métodos para carregamento das Listas de alimentação das TableViews. 
-	 * São executados pelo botão EDITAR, eliminar, alterar ou eliminar de cada entidade
-	 * Popular uma ObservableList com os dados da BD e desvolvemr à TableView
-	 *************************************************************************************************/
-    private ObservableList<Aluno> carregaListaAlunos(){
-    	
-    	/*TODO: Executa uma query à tabela Aluno
-    	 * para cada registo, extrai os 3 atributos: nProc, NAluno e nome
-    	 *  Executa um métofo nas UtilsSQLconn que 
-    	 *  executa a query, 
-    	 *  preenche uma lista destas
-    	 *  e devolve-a preenchida para quem a chamar. 
-    	 *  	- TableView, sempre que quer construir a lista
-    	 *  	- 
-    	 */
-    	
-    	
-    	ObservableList<Aluno> listaAlunos = FXCollections.observableArrayList();
-    	
-        listaAlunos.add(new Aluno(125, 0, "A.Ferraz"));
-        listaAlunos.add(new Aluno(126, 1, "Bruno Coimbra"));
-        listaAlunos.add(new Aluno(127, 2, "Catalin Criste"));
-        listaAlunos.add(new Aluno(128, 3, "David Sousa"));
-        listaAlunos.add(new Aluno(129, 6, "João Ventura"));
-        listaAlunos.add(new Aluno(130, 7, "Jorge Silva"));
-        listaAlunos.add(new Aluno(131, 8, "Marcelo Rachado"));
-        listaAlunos.add(new Aluno(132, 9, "Mariana Costa"));
-        listaAlunos.add(new Aluno(133, 10,"Patrícia Carmo"));
-        listaAlunos.add(new Aluno(134, 11,"Ricardo Gomes"));
-        listaAlunos.add(new Aluno(135, 12,"Rúben Severino"));
-        listaAlunos.add(new Aluno(136, 14,"Rui Ricardo"));
-        listaAlunos.add(new Aluno(137, 15,"Samuel Santos"));
-        
-        return listaAlunos;
-    }
     
     
     /*************************************************************************************************
@@ -591,7 +555,7 @@ public class Main extends Application {
 		Button btnCancelar = new Button("Cancelar");	// Botão Cancelar
 		btnCancelar.setOnAction(e->{
 			btnClicado = "";							// btnClicado passa a vazio
-			layoutRoot.setCenter(layoutAlunoLista());	// Carrega na região central, o Layout da lista de Alunos
+			layoutRoot.setCenter( layoutAlunoLista() );	// Carrega na região central, o Layout da lista de Alunos
 		});			
 		
 		Button btnOk = new Button("ok");				// Botão OK
@@ -638,6 +602,9 @@ public class Main extends Application {
 					///1º Se o botão clicado no layoutLeft foi INSERIR,
 					//2º btnOK executa a DML insert no método UtilsSQLConn.mySqlDml(dml)
 
+					// Tratar os dados para inserir na tabela, de acordo  com 
+					// o tipos de dados que está na atabela. CAso contrário
+					// gera erros "ocultos".
 					nProc   = Integer.parseInt(txtAlunoProcesso.getText());
 					nAluno  = Integer.parseInt(txtAlunoNTurma.getText());
 					nome 	= txtAlunoNome.getText();
